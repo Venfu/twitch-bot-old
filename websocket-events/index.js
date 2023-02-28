@@ -27,11 +27,33 @@ module.exports = {
           module.exports.sessionID = data.payload.session.id;
           done();
         }
+
+        // RAID
+        if (
+          data.metadata.message_type === "notification" &&
+          data.metadata.subscription_type === "channel.raid"
+        ) {
+          var messageEvent = `Accueillons chaleureusement ${vColorize.randomize(
+            data.payload.event.from_broadcaster_user_name
+          )} et ses <strong>${vColorize.apply(
+            data.payload.event.viewers,
+            "ff0000"
+          )}</strong> Viewers !`;
+          var messageChat = `Merci pour le raid ${data.payload.event.from_broadcaster_user_name} ❤️❤️❤️`;
+
+          vQueue.enqueue({
+            type: "raid",
+            user: data.payload.event.from_broadcaster_user_name,
+            message: messageEvent,
+          });
+          vCommands.sendText(messageChat);
+        }
+
+        // FOLLOW
         if (
           data.metadata.message_type === "notification" &&
           data.metadata.subscription_type === "channel.follow"
         ) {
-          // TODO : new follow implementation (check bdd for only 1 notification)
           vDataBase
             .get(`followers?from_id=${data.payload.event.user_id}`)
             .then((user) => {
@@ -87,6 +109,32 @@ module.exports = {
       return;
     });
   },
+  subscribeToRaidEvent: (clientID, accessToken, userID) => {
+    var postData = {
+      type: "channel.raid",
+      version: "1",
+      condition: {
+        to_broadcaster_user_id: userID,
+      },
+      transport: {
+        method: "websocket",
+        session_id: module.exports.sessionID,
+      },
+    };
+    var clientServerOptions = {
+      uri: URL_EVENTS_SUBSCRIPTION,
+      body: JSON.stringify(postData),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "Client-Id": clientID,
+      },
+    };
+    request(clientServerOptions, function (error, response) {
+      console.log("Subscribe to Raid Events", response.body);
+      return;
+    });
+  },
   subscribeToSubEvent: (clientID, accessToken, userID) => {},
-  subscribeToRaidEvent: (clientID, accessToken, userID) => {},
 };

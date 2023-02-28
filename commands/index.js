@@ -71,10 +71,11 @@ function onMessageHandler(target, context, msg, self) {
   if (context.mod && commandName.match(/^\!\!/gim)) {
     vQueue.enqueue({
       type: "announce",
-      message: `🔔🔔 Annonce : ${vColorize.apply(
-        commandName.substr(2),
+      message: `🔔🔔 Annonce de ${
         context.color
-      )} 🔔🔔`,
+          ? vColorize.apply(context["display-name"], context.color)
+          : vColorize.randomize(context["display-name"])
+      } : ${vColorize.randomize(commandName.substr(2))} 🔔🔔`,
     });
   }
 }

@@ -12,7 +12,6 @@ var passport = require("passport");
 var OAuth2Strategy = require("passport-oauth").OAuth2Strategy;
 var request = require("request");
 var path = require("path");
-const { spawn } = require("child_process");
 
 // Export secrets to config file
 require("dotenv").config();
