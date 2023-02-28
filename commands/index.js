@@ -68,6 +68,15 @@ function onMessageHandler(target, context, msg, self) {
   if (commandName === "!ca") {
     module.exports.client.say(target, ca());
   }
+  if (context.mod && commandName.match(/^\!\!/gim)) {
+    vQueue.enqueue({
+      type: "announce",
+      message: `🔔🔔 Annonce : ${vColorize.apply(
+        commandName.substr(2),
+        context.color
+      )} 🔔🔔`,
+    });
+  }
 }
 
 // COMMANDS

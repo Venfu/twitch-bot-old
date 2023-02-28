@@ -89,6 +89,7 @@ module.exports = {
     });
   },
   initFollowers(id, clientID, accessToken, pagination) {
+    module.exports.followersInitialized = true;
     if (module.exports.followersInitialized) return;
     var cursor = pagination ? `&after=${pagination.cursor}` : "";
     request(
@@ -113,8 +114,6 @@ module.exports = {
             accessToken,
             data.pagination
           );
-        } else {
-          module.exports.followersInitialized = true;
         }
       }
     );
