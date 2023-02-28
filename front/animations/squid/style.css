@@ -1,0 +1,207 @@
+#message {
+  margin-top: -30px;
+  font-size: 30px;
+  text-align: center;
+  color: white;
+  text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000, 1px 1px #000,
+    -1px -1px #000, 1px -1px #000, -1px 1px #000;
+}
+
+/* .squid-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+} */
+
+.squid-container .squid {
+  transform: scale(0.4, 0.4);
+  margin: 0 auto;
+}
+
+.squid-container .body {
+  position: relative;
+  height: 60px;
+  width: 90px;
+  background-color: #ffffff;
+  z-index: 3;
+}
+.squid-container .body:before,
+.squid-container .body:after {
+  content: "";
+  position: absolute;
+  top: -77px;
+  height: 150px;
+  width: 75px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  animation: body ease-in-out 1s infinite;
+}
+.squid-container .body:before {
+  transform: rotate(40deg);
+  left: -35px;
+}
+.squid-container .body:after {
+  transform: rotate(-40deg);
+  left: 35px;
+}
+
+.squid-container .eyes {
+  position: relative;
+  z-index: 3;
+  left: -10px;
+  width: 110px;
+}
+
+.squid-container .eye-right,
+.squid-container .eye-left {
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+.squid-container .eye-right:before,
+.squid-container .eye-left:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -5px;
+  left: -5px;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  background-color: #000000;
+}
+.squid-container .eye-right:after,
+.squid-container .eye-left:after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: #000000;
+}
+
+.squid-container .eye-left {
+  position: relative;
+}
+
+.squid-container .eye-right {
+  position: relative;
+  left: -10px;
+}
+
+.squid-container .tentacles {
+  position: relative;
+  top: -31px;
+  left: -22px;
+  z-index: 2;
+}
+
+.squid-container .tentacle {
+  display: inline-block;
+  height: 90px;
+  width: 40px;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+.squid-container .tentacle:not(first-of-type) {
+  margin-left: -10px;
+}
+.squid-container .tentacle:nth-child(1) {
+  transform: rotate(30deg);
+  animation: tentacle-left ease-in-out 1s infinite;
+}
+.squid-container .tentacle:nth-child(2) {
+  transform: rotate(10deg);
+  animation: tentacle-left-inner ease-in-out 1s infinite;
+}
+.squid-container .tentacle:nth-child(3) {
+  transform: rotate(-10deg);
+  animation: tentacle-right-inner ease-in-out 1s infinite;
+}
+.squid-container .tentacle:nth-child(4) {
+  transform: rotate(-30deg);
+  animation: tentacle-right ease-in-out 1s infinite;
+}
+
+/*** BACKGROUND SQUID ***/
+.squid-container .background > .squid {
+  position: absolute;
+  top: 1000px;
+  opacity: 0.5;
+  transform: scale(0.5);
+  animation: background-squid ease-in-out 5s infinite;
+}
+
+/*** ANIMATIONS ***/
+@keyframes body {
+  0% {
+    border-radius: 50%;
+  }
+  50% {
+    border-radius: 47%;
+    height: 155px;
+  }
+  100% {
+    border-radius: 50%;
+  }
+}
+@keyframes tentacle-left {
+  0% {
+    transform: rotate(35deg);
+  }
+  50% {
+    transform: rotate(0deg);
+    height: 100px;
+  }
+  100% {
+    transform: rotate(35deg);
+  }
+}
+@keyframes tentacle-left-inner {
+  0% {
+    transform: rotate(10deg);
+  }
+  40% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(10deg);
+  }
+}
+@keyframes tentacle-right-inner {
+  0% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-10deg);
+  }
+}
+@keyframes tentacle-right {
+  0% {
+    transform: rotate(-35deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-35deg);
+  }
+}
+@keyframes background-squid {
+  from {
+    top: 1000px;
+  }
+  to {
+    top: -200px;
+  }
+}

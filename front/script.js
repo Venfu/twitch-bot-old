@@ -1,5 +1,7 @@
+var body = document.querySelectorAll("body")[0];
+
 var displayEvent = () => {
-  fetch("http://localhost:3000/events", {
+  fetch("/events", {
     headers: {
       Accept: "application/json",
     },
@@ -8,13 +10,20 @@ var displayEvent = () => {
     .then((data) => {
       data = JSON.parse(data);
       if (!data.type) {
-        delay = 500;
-        setTimeout(displayEvent, delay);
+        body.innerHTML = "";
+        setTimeout(displayEvent, 500);
         return;
       }
-      document.getElementById("display").innerHTML = data.message;
-      delay = 10000;
-      setTimeout(displayEvent, delay);
+
+      setTimeout(displayEvent, 10000);
+      fetch("/animations/squid/page.html")
+        .then((resp) => resp.text())
+        .then((page) => {
+          body.innerHTML = page;
+          var vCustomEvent = new CustomEvent("event", { detail: data });
+          document.dispatchEvent(vCustomEvent);
+        });
     });
 };
-setTimeout(displayEvent, 0);
+
+displayEvent();

@@ -1,3 +1,6 @@
+var vQueue = require("../events/index.js");
+var vColorize = require("../colorize/index.js");
+
 module.exports = {
   initialized: false,
   client: null,
@@ -35,6 +38,17 @@ function onMessageHandler(target, context, msg, self) {
   if (self) {
     return;
   } // Ignore messages from the bot
+
+  ///////////////////
+  // TEST EVENTS
+  ///////////////////
+  // vQueue.enqueue({
+  //   type: "test",
+  //   message: vColorize.apply(msg.trim(), context.color),
+  // });
+  ///////////////////
+  // /TEST EVENTS
+  ///////////////////
 
   // Remove whitespace from chat message
   const commandName = msg.trim();

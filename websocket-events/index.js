@@ -3,6 +3,7 @@ var request = require("request");
 var vDataBase = require("../db/index.js");
 var vQueue = require("../events/index.js");
 var vCommands = require("../commands/index.js");
+var vColorize = require("../colorize/index.js");
 
 const URL_EVENTS_SUBSCRIPTION =
   "https://api.twitch.tv/helix/eventsub/subscriptions";
@@ -31,13 +32,32 @@ module.exports = {
           data.metadata.subscription_type === "channel.follow"
         ) {
           // TODO : new follow implementation (check bdd for only 1 notification)
-          var message = `Merci pour le follow ${data.payload.event.user_name} ❤️❤️❤️`;
-          vQueue.enqueue({
-            type: "follow",
-            user: data.payload.event.user_id,
-            message,
-          });
-          vCommands.sendText(message);
+          vDataBase
+            .get(`followers?from_id=${data.payload.event.user_id}`)
+            .then((user) => {
+              user = JSON.parse(user);
+              if (user.length) return;
+              var messageChat = `Merci pour le follow ${data.payload.event.user_name} ❤️❤️❤️`;
+              var messageEvent = `Merci pour le follow ${vColorize.randomize(
+                data.payload.event.user_name
+              )} ❤️❤️❤️`;
+              vQueue.enqueue({
+                type: "follow",
+                user: data.payload.event.user_id,
+                message: messageEvent,
+              });
+              vCommands.sendText(messageChat);
+              vDataBase.post("followers", {
+                from_id: data.payload.event.user_id,
+                from_login: data.payload.event.user_login,
+                from_name: data.payload.event.user_name,
+                to_id: data.payload.event.broadcaster_user_id,
+                to_login: data.payload.event.broadcaster_user_login,
+                to_name: data.payload.event.broadcaster_user_name,
+                followed_at: data.payload.event.followed_at,
+                id: 0,
+              });
+            });
         }
       });
     });
@@ -68,4 +88,5 @@ module.exports = {
     });
   },
   subscribeToSubEvent: (clientID, accessToken, userID) => {},
+  subscribeToRaidEvent: (clientID, accessToken, userID) => {},
 };

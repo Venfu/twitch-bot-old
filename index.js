@@ -12,6 +12,7 @@ var passport = require("passport");
 var OAuth2Strategy = require("passport-oauth").OAuth2Strategy;
 var request = require("request");
 var path = require("path");
+const { spawn } = require("child_process");
 
 // Export secrets to config file
 require("dotenv").config();
@@ -130,7 +131,12 @@ app.get("/", function (req, res) {
       req.session.passport.user.accessToken,
       CHANNEL
     );
-
+    // Download followers from Twitch and insert in DB
+    vDataBase.initFollowers(
+      req.session.passport.user.data[0].id,
+      TWITCH_CLIENT_ID,
+      req.session.passport.user.accessToken
+    );
     // Start Websocket Client
     vWebSockets.init().then(
       () => {
@@ -145,9 +151,14 @@ app.get("/", function (req, res) {
           req.session.passport.user.accessToken,
           req.session.passport.user.data[0].id
         );
+        vWebSockets.subscribeToRaidEvent(
+          TWITCH_CLIENT_ID,
+          req.session.passport.user.accessToken,
+          req.session.passport.user.data[0].id
+        );
       },
       (err) => {
-        console.log(err.message)
+        console.log(err.message);
       }
     );
   } else {

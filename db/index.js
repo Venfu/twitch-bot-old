@@ -9,6 +9,7 @@ const URL_DATABASE = `http://127.0.0.1:${port}`;
 
 module.exports = {
   initialized: false,
+  followersInitialized: false,
   init() {
     if (module.exports.initialized) return;
     // Verify dbFile exist and has right metadata
@@ -21,7 +22,9 @@ module.exports = {
 
       // Check if all REST entry are present
       if (!database.self) database.self = {};
-      if (!database.followers) database.followers = [];
+      // if (!database.eventHistory) database.eventHistory = [];
+      // if (!database.followers) database.followers = [];
+      database.followers = [];
 
       fs.writeFile(
         path.join(__dirname, dbname),
@@ -84,5 +87,36 @@ module.exports = {
         }
       );
     });
+  },
+  initFollowers(id, clientID, accessToken, pagination) {
+    if (module.exports.followersInitialized) return;
+    var cursor = pagination ? `&after=${pagination.cursor}` : "";
+    request(
+      {
+        uri: `https://api.twitch.tv/helix/users/follows?to_id=${id}${cursor}`,
+        method: "GET",
+        headers: {
+          "Client-ID": clientID,
+          Accept: "application/json",
+          Authorization: "Bearer " + accessToken,
+        },
+      },
+      (err, response, data) => {
+        data = JSON.parse(data);
+        data.data.forEach(async (e) => {
+          await module.exports.post("followers", e);
+        });
+        if (data.pagination.cursor) {
+          module.exports.initFollowers(
+            id,
+            clientID,
+            accessToken,
+            data.pagination
+          );
+        } else {
+          module.exports.followersInitialized = true;
+        }
+      }
+    );
   },
 };
