@@ -1,3 +1,4 @@
+/* thx for the job ! https://codepen.io/imjames/pen/aRKyow */
 audio {
   display: none;
 }
@@ -10,15 +11,6 @@ audio {
   text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000, 1px 1px #000,
     -1px -1px #000, 1px -1px #000, -1px 1px #000;
 }
-
-/* .squid-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow: hidden;
-} */
 
 .squid-container .squid {
   transform: scale(0.4, 0.4);

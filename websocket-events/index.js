@@ -41,11 +41,14 @@ module.exports = {
           )}</strong> Viewers !`;
           var messageChat = `Merci pour le raid ${data.payload.event.from_broadcaster_user_name} ❤️❤️❤️`;
 
-          vQueue.enqueue({
-            type: "raid",
-            user: data.payload.event.from_broadcaster_user_name,
-            message: messageEvent,
-          });
+          vQueue.enqueue(
+            new vQueue.Model(
+              "raid",
+              messageEvent,
+              vColorize.getRandomColor(),
+              data.payload.event.from_broadcaster_user_name
+            )
+          );
           vCommands.sendText(messageChat);
         }
 
@@ -63,11 +66,14 @@ module.exports = {
               var messageEvent = `Merci pour le follow ${vColorize.randomize(
                 data.payload.event.user_name
               )} ❤️❤️❤️`;
-              vQueue.enqueue({
-                type: "follow",
-                user: data.payload.event.user_id,
-                message: messageEvent,
-              });
+              vQueue.enqueue(
+                new vQueue.Model(
+                  "follow",
+                  messageEvent,
+                  vColorize.getRandomColor(),
+                  data.payload.event.user_name
+                )
+              );
               vCommands.sendText(messageChat);
               vDataBase.post("followers", {
                 from_id: data.payload.event.user_id,

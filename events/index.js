@@ -26,3 +26,25 @@ module.exports = {
     return items;
   },
 };
+
+module.exports.Model = class VEventsModel {
+  constructor(
+    type,
+    message,
+    color,
+    from,
+    to,
+    animation,
+    sound,
+    plainTextMessage
+  ) {
+    this.type = type || "";
+    this.message = message || "";
+    this.color = color;
+    this.from = from;
+    this.to = to;
+    this.animation = animation || 1;
+    this.sound = sound || 1;
+    this.plainTextMessage = plainTextMessage || "";
+  }
+};

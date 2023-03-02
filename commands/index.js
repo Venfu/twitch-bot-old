@@ -1,3 +1,6 @@
+var request = require("request");
+var vDataBase = require("../db/index.js");
+
 var vQueue = require("../events/index.js");
 var vColorize = require("../colorize/index.js");
 
@@ -6,6 +9,7 @@ module.exports = {
   client: null,
   init: (username, accessToken, channel) => {
     if (module.exports.initialized) return;
+
     const tmi = require("tmi.js");
     // Define configuration options
     const opts = {
@@ -53,39 +57,114 @@ function onMessageHandler(target, context, msg, self) {
   // Remove whitespace from chat message
   const commandName = msg.trim();
 
+  // Commons commands
   if (commandName === "!cmd") {
     module.exports.client.say(target, cmd());
   }
+
   if (commandName.match(/^\!dé( [0-9]*)?$/gim)) {
     module.exports.client.say(target, rollDice(commandName.substr(4)));
+    vQueue.enqueue(
+      new vQueue.Model(
+        "cmd-de",
+        rollDice(commandName.substr(4)),
+        context.color || vColorize.getRandomColor(),
+        context["display-name"],
+        "",
+        0,
+        0
+      )
+    );
   }
+
   if (commandName.match(/^\!hug( \@?[A-z1-9_]*)?$/gim)) {
     module.exports.client.say(
       target,
       hug(context["display-name"], commandName.substr(5))
     );
+    vQueue.enqueue(
+      new vQueue.Model(
+        "cmd-hug",
+        hug(context["display-name"], commandName.substr(5)),
+        context.color || vColorize.getRandomColor(),
+        context["display-name"],
+        commandName.substr(5),
+        0,
+        0
+      )
+    );
   }
+
   if (commandName === "!ca") {
     module.exports.client.say(target, ca());
+    vQueue.enqueue(
+      new vQueue.Model(
+        "cmd-ca",
+        ca(),
+        context.color || vColorize.getRandomColor(),
+        context["display-name"],
+        "",
+        0,
+        0
+      )
+    );
   }
-  if (context.mod && commandName.match(/^\!\!/gim)) {
-    vQueue.enqueue({
-      type: "announce",
-      message: `🔔🔔 Annonce de ${
-        context.color
-          ? vColorize.apply(context["display-name"], context.color)
-          : vColorize.randomize(context["display-name"])
-      } : ${vColorize.randomize(commandName.substr(2))} 🔔🔔`,
+
+  if (commandName.match(/^!clip( [0-9]{1,2})?/gim)) {
+    vDataBase.get("self").then((self) => {
+      self = JSON.parse(self);
+      request(
+        {
+          uri: `https://api.twitch.tv/helix/clips?broadcaster_id=${self.data[0].id}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + self.accessToken,
+            "Client-ID": self.clientId,
+          },
+        },
+        (err, resp, data) => {
+          if (err) console.log("Erreur création Clip");
+          else {
+            data = JSON.parse(data);
+            if (data.status && data.status === 404) return;
+            module.exports.client.say(target, data.data[0].edit_url);
+          }
+        }
+      );
     });
+  }
+
+  if (context.mod || (context.badges && context.badges.broadcaster === "1")) {
+    // Moderator commands
+    if (commandName.match(/^\!\!/gim)) {
+      vQueue.enqueue(
+        new vQueue.Model(
+          "announce",
+          `🔔🔔 Annonce de ${
+            context.color
+              ? vColorize.apply(context["display-name"], context.color)
+              : vColorize.randomize(context["display-name"])
+          } : ${vColorize.randomize(commandName.substr(2))} 🔔🔔`,
+          context.color || vColorize.getRandomColor(),
+          context["display-name"],
+          null,
+          1,
+          1,
+          commandName.substr(2)
+        )
+      );
+    }
   }
 }
 
 // COMMANDS
 function cmd() {
   return `Liste des commandes : 
-    !dé <nombre> 🎲
-    !ca 🌐
-    !hug @ 🤗`;
+    !dé <nombre> 🎲 
+    !ca 🌐 
+    !hug @ 🤗 
+    !clip 🔴 `;
 }
 
 // DE

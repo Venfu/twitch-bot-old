@@ -9,7 +9,7 @@ const URL_DATABASE = `http://127.0.0.1:${port}`;
 
 module.exports = {
   initialized: false,
-  followersInitialized: false,
+  isFollowersInitialized: false,
   init() {
     if (module.exports.initialized) return;
     // Verify dbFile exist and has right metadata
@@ -89,7 +89,7 @@ module.exports = {
     });
   },
   initFollowers(id, clientID, accessToken, pagination) {
-    if (module.exports.followersInitialized) return;
+    if (module.exports.isFollowersInitialized) return;
     var cursor = pagination ? `&after=${pagination.cursor}` : "";
     request(
       {
@@ -114,7 +114,7 @@ module.exports = {
             data.pagination
           );
         } else {
-          module.exports.followersInitialized = true;
+          module.exports.isFollowersInitialized = true;
         }
       }
     );

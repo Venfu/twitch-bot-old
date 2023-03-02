@@ -34,6 +34,7 @@ var vDataBase = require("./db/index.js");
 vDataBase.init();
 // Events Queue
 var vQueue = require("./events/index.js");
+var vColorize = require("./colorize/index.js");
 
 // Initialize Express and middlewares
 var app = express();
@@ -87,6 +88,7 @@ passport.use(
     function (accessToken, refreshToken, profile, done) {
       profile.accessToken = accessToken;
       profile.refreshToken = refreshToken;
+      profile.clientId = TWITCH_CLIENT_ID;
 
       // Securely store user profile in your DB
       //User.findOrCreate(..., function(err, user) {
@@ -104,7 +106,13 @@ passport.use(
 app.get(
   "/auth/twitch",
   passport.authenticate("twitch", {
-    scope: ["user_read", "chat:read", "chat:edit", "moderator:read:followers"],
+    scope: [
+      "user_read",
+      "chat:read",
+      "chat:edit",
+      "moderator:read:followers",
+      "clips:edit",
+    ],
   })
 );
 
@@ -120,25 +128,21 @@ app.get(
 // If user has an authenticated session, display it, otherwise display link to authenticate
 app.get("/", function (req, res) {
   if (req.session && req.session.passport && req.session.passport.user) {
-    // Serve static files + index
-    res.sendFile(path.join(__dirname, "front", "index.html"));
-    app.use(express.static(path.join(__dirname, "front")));
-
-    // Start Chatbot commands
-    vCommands.init(
-      BOT_USERNAME,
-      req.session.passport.user.accessToken,
-      CHANNEL
-    );
-    // Download followers from Twitch and insert in DB
-    vDataBase.initFollowers(
-      req.session.passport.user.data[0].id,
-      TWITCH_CLIENT_ID,
-      req.session.passport.user.accessToken
-    );
     // Start Websocket Client
     vWebSockets.init().then(
       () => {
+        // Start Chatbot commands
+        vCommands.init(
+          BOT_USERNAME,
+          req.session.passport.user.accessToken,
+          CHANNEL
+        );
+        // Download followers from Twitch and insert in DB
+        vDataBase.initFollowers(
+          req.session.passport.user.data[0].id,
+          TWITCH_CLIENT_ID,
+          req.session.passport.user.accessToken
+        );
         // Subscribe to Websockets Events
         vWebSockets.subscribeToFollowEvent(
           TWITCH_CLIENT_ID,
@@ -160,6 +164,10 @@ app.get("/", function (req, res) {
         console.log(err.message);
       }
     );
+
+    // Serve static files + index
+    res.sendFile(path.join(__dirname, "front", "index.html"));
+    app.use(express.static(path.join(__dirname, "front")));
   } else {
     // If not connected then connect
     res.send(
@@ -179,10 +187,30 @@ app.get("/", function (req, res) {
 
 app.get("/events", function (req, res) {
   res.send(vQueue.dequeue());
+  res.end();
 });
 
 app.get("/events/all", function (req, res) {
   res.send(vQueue.printQueue());
+  res.end();
+});
+
+app.get("/init/overlay", function (req, res) {
+  if (!vDataBase.isFollowersInitialized) {
+    res.send(`{"lastFollow": 0}`);
+    res.end();
+  } else {
+    vDataBase.get("followers?id=1").then((f) => {
+      f = JSON.parse(f);
+      res.send(
+        JSON.stringify({
+          lastFollow: f[0].from_name,
+          color: vColorize.getRandomColor(),
+        })
+      );
+      res.end();
+    });
+  }
 });
 
 app.listen(3000, function () {

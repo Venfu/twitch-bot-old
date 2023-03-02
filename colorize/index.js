@@ -5,8 +5,9 @@ module.exports = {
     return `<span style="color: #${color};">${message}</span>`;
   },
   randomize: (message) => {
-    return `<span style="color: #${
-      colors[Math.floor(Math.random() * colors.length)]
-    };">${message}</span>`;
+    return `<span style="color: ${module.exports.getRandomColor()};">${message}</span>`;
+  },
+  getRandomColor: () => {
+    return "#" + colors[Math.floor(Math.random() * colors.length)];
   },
 };
